@@ -1,0 +1,96 @@
+Description: We need to add all the recursively devendorized dependent wheels
+ to sys.path so that they can be imported.  These wheel files live in
+ different places depending on whether we're inside or outside a virtual
+ environment.
+Author: Barry Warsaw <barry@debian.org>
+Forwarded: not-needed
+
+--- a/pip/__init__.py
++++ b/pip/__init__.py
+@@ -4,6 +4,69 @@
+ 
+ import sys
+ import re
++import errno
++
++# Upstream pip vendorizes a bunch of its dependencies.  Debian de-vendorizes
++# (unbundles) these dependencies to be compliant with Debian policy.  Instead,
++# these dependencies are packaged as wheel (.whl) files in a known location.
++# When pip itself executes, we have to arrange for these wheels to show up
++# earlier on sys.path than any  other version of these packages, otherwise
++# things can break.  See for example Bug #744145.
++#
++# The location of the wheels differs depending on whether we're inside or
++# outside a virtual environment, regardless of whether that venv was created
++# with virtualenv or pyvenv.  The first thing we have to do is figure out if
++# we're inside or outside a venv, then search the appropriate wheel directory
++# and add all the .whls found there to the front of sys.path.  As per Debian
++# Python Policy, only the wheels needed to support this de-vendorization will
++# be present, so it's safe to add them all.
++#
++# venv determination is a bit of a black art, but this algorithm should work
++# in both Python 2 (virtualenv-only) and Python 3 (pyvenv and virtualenv).  -
++# updated by barry@debian.org 2015-02-25
++
++base_prefix = getattr(sys, 'base_prefix', None)
++real_prefix = getattr(sys, 'real_prefix', None)
++if base_prefix is None:
++    # Python 2 has no base_prefix at all.  It also has no pyvenv.  Fall back
++    # to checking real_prefix.
++    if real_prefix is None:
++        # We are not in a venv.
++        in_venv = False
++    else:
++        # We're in a Python 2 virtualenv created venv, but real_prefix should
++        # never be the same as sys.prefix.
++        assert sys.prefix != real_prefix
++        in_venv = True
++elif sys.prefix != base_prefix:
++    # We're in a Python 3, pyvenv created venv.
++    in_venv = True
++elif real_prefix is None:
++    # We're in Python 3, outside a venv, but base better equal prefix.
++    assert sys.prefix == base_prefix
++    in_venv = False
++else:
++    # We're in a Python 3, virtualenv created venv.
++    assert real_prefix != sys.prefix
++    in_venv = True
++
++
++if in_venv:
++    wheel_dir = os.path.join(sys.prefix, 'lib', 'python-wheels')
++else:
++    wheel_dir = '/usr/share/python-wheels'
++
++# We'll add all the wheels we find to the front of sys.path so that they're
++# found first, even if the same dependencies are available in site-packages.
++try:
++    for filename in os.listdir(wheel_dir):
++        if os.path.splitext(filename)[1] == '.whl':
++            sys.path.insert(0, os.path.join(wheel_dir, filename))
++# FileNotFoundError doesn't exist in Python 2, but ignore it anyway.
++except OSError as error:
++    if error.errno != errno.ENOENT:
++        raise
++
+ 
+ from pip.exceptions import InstallationError, CommandError, PipError
+ from pip.log import logger
+--- a/setup.py
++++ b/setup.py
+@@ -41,7 +41,13 @@
+ long_description = "\n" + "\n".join([read('PROJECT.txt'),
+                                      read('docs', 'quickstart.rst')])
+ 
+-tests_require = ['pytest', 'virtualenv>=1.10', 'scripttest>=1.3', 'mock']
++tests_require = ['pytest', 'scripttest>=1.3', 'mock']
++
++# In Debian, the virtualenv Build-Depends will satisfy this requirement
++# but setup() is too dumb to notice that.
++if sys.version_info < (3,):
++    tests_require.append('virtualenv>=1.10')
++
+ 
+ setup(name="pip",
+       version=find_version('pip', '__init__.py'),

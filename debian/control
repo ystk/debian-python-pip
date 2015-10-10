@@ -1,0 +1,86 @@
+Source: python-pip
+Section: python
+Priority: optional
+Maintainer: Debian Python Modules Team <python-modules-team@lists.alioth.debian.org>
+Uploaders: Carl Chenet <chaica@debian.org>, Jeff Licquia <licquia@debian.org>
+Homepage: http://www.pip-installer.org/
+Build-Depends: debhelper (>= 8),
+               dh-python,
+               python-all (>= 2.6),
+               python-docutils,
+               python-mock,
+               python-pytest,
+               python-scripttest,
+               python-setuptools,
+               python-virtualenv,
+               python3-all,
+               python3-mock,
+               python3-pytest,
+               python3-scripttest,
+               python3-setuptools,
+               python3-wheel
+Standards-Version: 3.9.6
+X-Python-Version: >= 2.6
+X-Python3-Version: >= 3.2
+Vcs-Svn: svn://anonscm.debian.org/python-modules/packages/python-pip/trunk/
+Vcs-Browser: http://anonscm.debian.org/viewvc/python-modules/packages/python-pip/trunk/
+
+Package: python-pip
+Architecture: all
+Depends: ca-certificates,
+         python-colorama,
+         python-distlib,
+         python-html5lib,
+         python-pkg-resources,
+         python-requests,
+         python-setuptools (>= 0.6c1),
+         python-six,
+         ${misc:Depends},
+         ${python:Depends}
+Recommends: build-essential, python-dev-all (>= 2.6), python-wheel
+Description: alternative Python package installer
+ pip is a replacement for easy_install, and is intended to be an improved
+ Python package installer.  It integrates with virtualenv, doesn't do partial
+ installs, can save package state for replaying, can install from non-egg
+ sources, and can install from version control repositories.
+
+Package: python3-pip
+Architecture: all
+Depends: ca-certificates,
+         python3-colorama,
+         python3-distlib,
+         python3-html5lib,
+         python3-pkg-resources,
+         python3-requests,
+         python3-setuptools,
+         python3-six,
+         ${misc:Depends},
+         ${python3:Depends}
+Recommends: build-essential, python3-dev (>= 3.2), python3-wheel
+Description: alternative Python package installer - Python 3 version of the package
+ pip is a replacement for easy_install, and is intended to be an improved
+ Python package installer.  It integrates with virtualenv, doesn't do partial
+ installs, can save package state for replaying, can install from non-egg
+ sources, and can install from version control repositories.
+ .
+ This is the Python 3 version of the package.
+
+Package: python-pip-whl
+Architecture: all
+Depends: python-chardet-whl,
+         python-colorama-whl,
+         python-distlib-whl,
+         python-html5lib-whl,
+         python-requests-whl,
+         python-setuptools-whl,
+         python-six-whl,
+         python-urllib3-whl,
+         ${misc:Depends}
+Description: alternative Python package installer
+ pip is a replacement for easy_install, and is intended to be an improved
+ Python package installer.  It integrates with virtualenv, doesn't do partial
+ installs, can save package state for replaying, can install from non-egg
+ sources, and can install from version control repositories.
+ .
+ This is the support package for the PEP 427 wheel version of the package,
+ required for using pip inside a virtual environment.

@@ -1,0 +1,113 @@
+Description: Prevent pip from removing system installed packages
+From 8003cce736bd068cb4f9ad891f0490f611c01bda Mon Sep 17 00:00:00 2001
+From: Geoffrey Thomas <geofft@ldpreload.com>
+Date: Wed, 3 Dec 2014 11:18:11 -0600
+Subject: [PATCH 1/2] Adjust is_local to consider OS-owned paths nonlocal.
+.
+See Debian #771794 for the motivation.
+From a2ec6cbdb6bcc23aeb39c0dc04741c8745b0ddc7 Mon Sep 17 00:00:00 2001
+From: Geoffrey Thomas <geofft@ldpreload.com>
+Date: Wed, 3 Dec 2014 13:38:58 -0600
+Subject: [PATCH 2/2] Fix error message for is_local in the non-virtualenv case
+.
+While not committed upstream, the patch author has submitted it and it is
+being reviewed.  Upstream did provide positive feedback for inclusion in
+Debian.
+Author: Geoffrey Thomas <geofft@ldpreload.com>
+Bug-Debian: http://bugs.debian.org/771794
+Origin: https://github.com/geofft/pip.git
+Forwarded: not-needed
+Reviewed-By: Donald Stufft <donald@stufft.io>
+Reviewed-By: Scott Kitterman <scott@kitterman.com>
+Last-Update: 2014-12-04
+
+--- python-pip-1.5.6.orig/pip/req.py
++++ python-pip-1.5.6/pip/req.py
+@@ -17,6 +17,7 @@ from pip.exceptions import (Installation
+                             DistributionNotFound, PreviousBuildDirError)
+ from pip.vcs import vcs
+ from pip.log import logger
++from pip.locations import running_under_virtualenv
+ from pip.util import (display_path, rmtree, ask, ask_path_exists, backup_dir,
+                       is_installable_dir, is_local, dist_is_local,
+                       dist_in_usersite, dist_in_site_packages, renames,
+@@ -1759,8 +1760,16 @@ class UninstallPathSet(object):
+ 
+     def _can_uninstall(self):
+         if not dist_is_local(self.dist):
+-            logger.notify("Not uninstalling %s at %s, outside environment %s"
+-                          % (self.dist.project_name, normalize_path(self.dist.location), sys.prefix))
++            if running_under_virtualenv():
++                reason = "outside environment %s" % (sys.prefix,)
++            else:
++                reason = "owned by OS"
++            logger.notify(
++                "Not uninstalling %s at %s, %s",
++                self.dist.project_name,
++                normalize_path(self.dist.location),
++                reason
++            )
+             return False
+         return True
+ 
+--- python-pip-1.5.6.orig/pip/util.py
++++ python-pip-1.5.6/pip/util.py
+@@ -13,7 +13,8 @@ import tempfile
+ from pip.exceptions import InstallationError, BadCommand, PipError
+ from pip.backwardcompat import(WindowsError, string_types, raw_input,
+                                 console_to_str, user_site, PermissionError)
+-from pip.locations import site_packages, running_under_virtualenv, virtualenv_no_global
++from pip.locations import (site_packages, running_under_virtualenv, virtualenv_no_global,
++                           distutils_scheme)
+ from pip.log import logger
+ import pkg_resources
+ from distlib import version
+@@ -305,22 +306,39 @@ def renames(old, new):
+ 
+ def is_local(path):
+     """
+-    Return True if path is within sys.prefix, if we're running in a virtualenv.
++    Return True if this is a path pip is allowed to modify.
+ 
+-    If we're not in a virtualenv, all paths are considered "local."
++    If we're in a virtualenv, sys.prefix points to the virtualenv's
++    prefix; only sys.prefix is considered local.
++
++    If we're not in a virtualenv, in general we can modify anything.
++    However, if the OS vendor has configured distutils to install
++    somewhere other than sys.prefix (which could be a subdirectory of
++    sys.prefix, e.g. /usr/local), we consider sys.prefix itself nonlocal
++    and the domain of the OS vendor. (In other words, everything _other
++    than_ sys.prefix is considered local.)
+ 
+     """
+-    if not running_under_virtualenv():
+-        return True
+-    return normalize_path(path).startswith(normalize_path(sys.prefix))
++
++    path = normalize_path(path)
++    prefix = normalize_path(sys.prefix)
++
++    if running_under_virtualenv():
++        return path.startswith(normalize_path(sys.prefix))
++    else:
++        if path.startswith(prefix):
++            for local_path in distutils_scheme("").values():
++                if path.startswith(normalize_path(local_path)):
++                    return True
++            return False
++        else:
++            return True
+ 
+ 
+ def dist_is_local(dist):
+     """
+-    Return True if given Distribution object is installed locally
+-    (i.e. within current virtualenv).
+-
+-    Always True if we're not in a virtualenv.
++    Return True if given Distribution object is installed somewhere pip
++    is allowed to modify.
+ 
+     """
+     return is_local(dist_location(dist))

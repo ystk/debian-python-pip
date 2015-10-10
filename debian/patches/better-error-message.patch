@@ -1,0 +1,21 @@
+Description: Provide a better, Debian-specific error message when someone
+ tries to run the `pip wheel` command before installing the necessary package.
+Author: Barry Warsaw <barry@debian.org>
+Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=733286
+Forwarded: not-needed
+
+--- a/pip/commands/wheel.py
++++ b/pip/commands/wheel.py
+@@ -88,7 +88,11 @@
+         try:
+             import wheel.bdist_wheel
+         except ImportError:
+-            raise CommandError("'pip wheel' requires the 'wheel' package. To fix this, run:  pip install wheel")
++            if sys.version_info < (3,):
++                debian_package = 'python-wheel'
++            else:
++                debian_package = 'python3-wheel'
++            raise CommandError("'pip wheel' requires the 'wheel' package. To fix this, run: sudo apt-get install %s" % debian_package)
+ 
+         try:
+             import pkg_resources

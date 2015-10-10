@@ -1,0 +1,16 @@
+Description: Don't install Python minor version specific endpoints
+Forwarded: https://github.com/pypa/pip/pull/976
+Bug-Upstream: https://github.com/pypa/pip/issues/943
+Author: Stefano Rivera <stefanor@debian.org>
+
+--- a/setup.py
++++ b/setup.py
+@@ -50,7 +50,7 @@
+       url='http://www.pip-installer.org',
+       license='MIT',
+       packages=find_packages(exclude=["contrib", "docs", "tests*"]),
+-      entry_points=dict(console_scripts=['pip=pip:main', 'pip-%s=pip:main' % sys.version[:3]]),
++      entry_points=dict(console_scripts=['pip=pip:main', 'pip%i=pip:main' % sys.version_info[0]]),
+       test_suite='nose.collector',
+       tests_require=tests_require,
+       zip_safe=False,

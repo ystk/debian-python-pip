@@ -1,0 +1,310 @@
+Description: Use Debian packages instead of vendorized versions.
+Author: Barry Warsaw <barry@debian.org>
+Forwarded: not-needed
+
+--- a/pip/baseparser.py
++++ b/pip/baseparser.py
+@@ -9,7 +9,6 @@
+ from pip.backwardcompat import ConfigParser, string_types
+ from pip.locations import default_config_file
+ from pip.util import get_terminal_size, get_prog
+-from pip._vendor import pkg_resources
+ 
+ 
+ class PrettyHelpFormatter(optparse.IndentedHelpFormatter):
+--- a/pip/download.py
++++ b/pip/download.py
+@@ -19,13 +19,13 @@
+                       create_download_cache_folder, cache_download)
+ from pip.vcs import vcs
+ from pip.log import logger
+-from pip._vendor import requests, six
+-from pip._vendor.requests.adapters import BaseAdapter
+-from pip._vendor.requests.auth import AuthBase, HTTPBasicAuth
+-from pip._vendor.requests.compat import IncompleteRead
+-from pip._vendor.requests.exceptions import InvalidURL, ChunkedEncodingError
+-from pip._vendor.requests.models import Response
+-from pip._vendor.requests.structures import CaseInsensitiveDict
++import requests, six
++from requests.adapters import BaseAdapter
++from requests.auth import AuthBase, HTTPBasicAuth
++from requests.compat import IncompleteRead
++from requests.exceptions import InvalidURL, ChunkedEncodingError
++from requests.models import Response
++from requests.structures import CaseInsensitiveDict
+ 
+ __all__ = ['get_file_content',
+            'is_url', 'url_to_path', 'path_to_url',
+--- a/pip/commands/show.py
++++ b/pip/commands/show.py
+@@ -2,7 +2,7 @@
+ 
+ from pip.basecommand import Command
+ from pip.log import logger
+-from pip._vendor import pkg_resources
++import pkg_resources
+ 
+ 
+ class ShowCommand(Command):
+--- a/pip/commands/freeze.py
++++ b/pip/commands/freeze.py
+@@ -6,7 +6,7 @@
+ from pip.log import logger
+ from pip.basecommand import Command
+ from pip.util import get_installed_distributions
+-from pip._vendor import pkg_resources
++import pkg_resources
+ 
+ 
+ class FreezeCommand(Command):
+--- a/pip/commands/search.py
++++ b/pip/commands/search.py
+@@ -9,7 +9,7 @@
+ from pip.backwardcompat import xmlrpclib, reduce, cmp
+ from pip.exceptions import CommandError
+ from pip.status_codes import NO_MATCHES_FOUND
+-from pip._vendor import pkg_resources
++import pkg_resources
+ from distutils.version import StrictVersion, LooseVersion
+ 
+ 
+--- a/pip/log.py
++++ b/pip/log.py
+@@ -6,7 +6,7 @@
+ import logging
+ 
+ from pip import backwardcompat
+-from pip._vendor import colorama, pkg_resources
++import colorama, pkg_resources
+ 
+ 
+ def _color_wrap(*colors):
+--- a/pip/req.py
++++ b/pip/req.py
+@@ -33,7 +33,7 @@
+                           unpack_file_url, unpack_http_url)
+ import pip.wheel
+ from pip.wheel import move_wheel_files, Wheel, wheel_ext
+-from pip._vendor import pkg_resources, six
++import pkg_resources, six
+ 
+ 
+ def read_text_file(filename):
+--- a/pip/util.py
++++ b/pip/util.py
+@@ -14,8 +14,8 @@
+                                 console_to_str, user_site, PermissionError)
+ from pip.locations import site_packages, running_under_virtualenv, virtualenv_no_global
+ from pip.log import logger
+-from pip._vendor import pkg_resources
+-from pip._vendor.distlib import version
++import pkg_resources
++from distlib import version
+ 
+ __all__ = ['rmtree', 'display_path', 'backup_dir',
+            'find_command', 'ask', 'Inf',
+--- a/pip/index.py
++++ b/pip/index.py
+@@ -14,8 +14,8 @@
+ from pip.download import PipSession, url_to_path, path_to_url
+ from pip.wheel import Wheel, wheel_ext
+ from pip.pep425tags import supported_tags, supported_tags_noarch, get_platform
+-from pip._vendor import html5lib, requests, pkg_resources
+-from pip._vendor.requests.exceptions import SSLError
++import html5lib, requests, pkg_resources
++from requests.exceptions import SSLError
+ 
+ 
+ __all__ = ['PackageFinder']
+--- a/pip/wheel.py
++++ b/pip/wheel.py
+@@ -21,9 +21,8 @@
+ from pip.log import logger
+ from pip import pep425tags
+ from pip.util import call_subprocess, normalize_path, make_path_relative
+-from pip._vendor import pkg_resources
+-from pip._vendor.distlib.scripts import ScriptMaker
+-from pip._vendor import pkg_resources
++import pkg_resources
++from distlib.scripts import ScriptMaker
+ 
+ 
+ wheel_ext = '.whl'
+--- a/setup.py
++++ b/setup.py
+@@ -67,9 +67,6 @@
+       license='MIT',
+       packages=find_packages(exclude=["contrib", "docs", "tests*"]),
+       package_data={
+-          'pip._vendor.requests': ['*.pem'],
+-          'pip._vendor.distlib._backport': ['sysconfig.cfg'],
+-          'pip._vendor.distlib': ['t32.exe', 't64.exe', 'w32.exe', 'w64.exe'],
+       },
+       entry_points=dict(console_scripts=['pip=pip:main', 'pip%s=pip:main' % sys.version[:1],
+           'pip%s=pip:main' % sys.version[:3]]),
+--- a/pip.egg-info/SOURCES.txt
++++ b/pip.egg-info/SOURCES.txt
+@@ -49,156 +49,6 @@
+ pip.egg-info/not-zip-safe
+ pip.egg-info/requires.txt
+ pip.egg-info/top_level.txt
+-pip/_vendor/__init__.py
+-pip/_vendor/pkg_resources.py
+-pip/_vendor/re-vendor.py
+-pip/_vendor/six.py
+-pip/_vendor/_markerlib/__init__.py
+-pip/_vendor/_markerlib/markers.py
+-pip/_vendor/colorama/__init__.py
+-pip/_vendor/colorama/ansi.py
+-pip/_vendor/colorama/ansitowin32.py
+-pip/_vendor/colorama/initialise.py
+-pip/_vendor/colorama/win32.py
+-pip/_vendor/colorama/winterm.py
+-pip/_vendor/distlib/__init__.py
+-pip/_vendor/distlib/compat.py
+-pip/_vendor/distlib/database.py
+-pip/_vendor/distlib/index.py
+-pip/_vendor/distlib/locators.py
+-pip/_vendor/distlib/manifest.py
+-pip/_vendor/distlib/markers.py
+-pip/_vendor/distlib/metadata.py
+-pip/_vendor/distlib/resources.py
+-pip/_vendor/distlib/scripts.py
+-pip/_vendor/distlib/t32.exe
+-pip/_vendor/distlib/t64.exe
+-pip/_vendor/distlib/util.py
+-pip/_vendor/distlib/version.py
+-pip/_vendor/distlib/w32.exe
+-pip/_vendor/distlib/w64.exe
+-pip/_vendor/distlib/wheel.py
+-pip/_vendor/distlib/_backport/__init__.py
+-pip/_vendor/distlib/_backport/misc.py
+-pip/_vendor/distlib/_backport/shutil.py
+-pip/_vendor/distlib/_backport/sysconfig.cfg
+-pip/_vendor/distlib/_backport/sysconfig.py
+-pip/_vendor/distlib/_backport/tarfile.py
+-pip/_vendor/html5lib/__init__.py
+-pip/_vendor/html5lib/constants.py
+-pip/_vendor/html5lib/html5parser.py
+-pip/_vendor/html5lib/ihatexml.py
+-pip/_vendor/html5lib/inputstream.py
+-pip/_vendor/html5lib/sanitizer.py
+-pip/_vendor/html5lib/tokenizer.py
+-pip/_vendor/html5lib/utils.py
+-pip/_vendor/html5lib/filters/__init__.py
+-pip/_vendor/html5lib/filters/_base.py
+-pip/_vendor/html5lib/filters/alphabeticalattributes.py
+-pip/_vendor/html5lib/filters/inject_meta_charset.py
+-pip/_vendor/html5lib/filters/lint.py
+-pip/_vendor/html5lib/filters/optionaltags.py
+-pip/_vendor/html5lib/filters/sanitizer.py
+-pip/_vendor/html5lib/filters/whitespace.py
+-pip/_vendor/html5lib/serializer/__init__.py
+-pip/_vendor/html5lib/serializer/htmlserializer.py
+-pip/_vendor/html5lib/treeadapters/__init__.py
+-pip/_vendor/html5lib/treeadapters/sax.py
+-pip/_vendor/html5lib/treebuilders/__init__.py
+-pip/_vendor/html5lib/treebuilders/_base.py
+-pip/_vendor/html5lib/treebuilders/dom.py
+-pip/_vendor/html5lib/treebuilders/etree.py
+-pip/_vendor/html5lib/treebuilders/etree_lxml.py
+-pip/_vendor/html5lib/treewalkers/__init__.py
+-pip/_vendor/html5lib/treewalkers/_base.py
+-pip/_vendor/html5lib/treewalkers/dom.py
+-pip/_vendor/html5lib/treewalkers/etree.py
+-pip/_vendor/html5lib/treewalkers/genshistream.py
+-pip/_vendor/html5lib/treewalkers/lxmletree.py
+-pip/_vendor/html5lib/treewalkers/pulldom.py
+-pip/_vendor/html5lib/trie/__init__.py
+-pip/_vendor/html5lib/trie/_base.py
+-pip/_vendor/html5lib/trie/datrie.py
+-pip/_vendor/html5lib/trie/py.py
+-pip/_vendor/requests/__init__.py
+-pip/_vendor/requests/adapters.py
+-pip/_vendor/requests/api.py
+-pip/_vendor/requests/auth.py
+-pip/_vendor/requests/cacert.pem
+-pip/_vendor/requests/certs.py
+-pip/_vendor/requests/compat.py
+-pip/_vendor/requests/cookies.py
+-pip/_vendor/requests/exceptions.py
+-pip/_vendor/requests/hooks.py
+-pip/_vendor/requests/models.py
+-pip/_vendor/requests/sessions.py
+-pip/_vendor/requests/status_codes.py
+-pip/_vendor/requests/structures.py
+-pip/_vendor/requests/utils.py
+-pip/_vendor/requests/packages/__init__.py
+-pip/_vendor/requests/packages/chardet/__init__.py
+-pip/_vendor/requests/packages/chardet/big5freq.py
+-pip/_vendor/requests/packages/chardet/big5prober.py
+-pip/_vendor/requests/packages/chardet/chardetect.py
+-pip/_vendor/requests/packages/chardet/chardistribution.py
+-pip/_vendor/requests/packages/chardet/charsetgroupprober.py
+-pip/_vendor/requests/packages/chardet/charsetprober.py
+-pip/_vendor/requests/packages/chardet/codingstatemachine.py
+-pip/_vendor/requests/packages/chardet/compat.py
+-pip/_vendor/requests/packages/chardet/constants.py
+-pip/_vendor/requests/packages/chardet/cp949prober.py
+-pip/_vendor/requests/packages/chardet/escprober.py
+-pip/_vendor/requests/packages/chardet/escsm.py
+-pip/_vendor/requests/packages/chardet/eucjpprober.py
+-pip/_vendor/requests/packages/chardet/euckrfreq.py
+-pip/_vendor/requests/packages/chardet/euckrprober.py
+-pip/_vendor/requests/packages/chardet/euctwfreq.py
+-pip/_vendor/requests/packages/chardet/euctwprober.py
+-pip/_vendor/requests/packages/chardet/gb2312freq.py
+-pip/_vendor/requests/packages/chardet/gb2312prober.py
+-pip/_vendor/requests/packages/chardet/hebrewprober.py
+-pip/_vendor/requests/packages/chardet/jisfreq.py
+-pip/_vendor/requests/packages/chardet/jpcntx.py
+-pip/_vendor/requests/packages/chardet/langbulgarianmodel.py
+-pip/_vendor/requests/packages/chardet/langcyrillicmodel.py
+-pip/_vendor/requests/packages/chardet/langgreekmodel.py
+-pip/_vendor/requests/packages/chardet/langhebrewmodel.py
+-pip/_vendor/requests/packages/chardet/langhungarianmodel.py
+-pip/_vendor/requests/packages/chardet/langthaimodel.py
+-pip/_vendor/requests/packages/chardet/latin1prober.py
+-pip/_vendor/requests/packages/chardet/mbcharsetprober.py
+-pip/_vendor/requests/packages/chardet/mbcsgroupprober.py
+-pip/_vendor/requests/packages/chardet/mbcssm.py
+-pip/_vendor/requests/packages/chardet/sbcharsetprober.py
+-pip/_vendor/requests/packages/chardet/sbcsgroupprober.py
+-pip/_vendor/requests/packages/chardet/sjisprober.py
+-pip/_vendor/requests/packages/chardet/universaldetector.py
+-pip/_vendor/requests/packages/chardet/utf8prober.py
+-pip/_vendor/requests/packages/urllib3/__init__.py
+-pip/_vendor/requests/packages/urllib3/_collections.py
+-pip/_vendor/requests/packages/urllib3/connection.py
+-pip/_vendor/requests/packages/urllib3/connectionpool.py
+-pip/_vendor/requests/packages/urllib3/exceptions.py
+-pip/_vendor/requests/packages/urllib3/fields.py
+-pip/_vendor/requests/packages/urllib3/filepost.py
+-pip/_vendor/requests/packages/urllib3/poolmanager.py
+-pip/_vendor/requests/packages/urllib3/request.py
+-pip/_vendor/requests/packages/urllib3/response.py
+-pip/_vendor/requests/packages/urllib3/contrib/__init__.py
+-pip/_vendor/requests/packages/urllib3/contrib/ntlmpool.py
+-pip/_vendor/requests/packages/urllib3/contrib/pyopenssl.py
+-pip/_vendor/requests/packages/urllib3/packages/__init__.py
+-pip/_vendor/requests/packages/urllib3/packages/ordered_dict.py
+-pip/_vendor/requests/packages/urllib3/packages/six.py
+-pip/_vendor/requests/packages/urllib3/packages/ssl_match_hostname/__init__.py
+-pip/_vendor/requests/packages/urllib3/packages/ssl_match_hostname/_implementation.py
+-pip/_vendor/requests/packages/urllib3/util/__init__.py
+-pip/_vendor/requests/packages/urllib3/util/connection.py
+-pip/_vendor/requests/packages/urllib3/util/request.py
+-pip/_vendor/requests/packages/urllib3/util/response.py
+-pip/_vendor/requests/packages/urllib3/util/ssl_.py
+-pip/_vendor/requests/packages/urllib3/util/timeout.py
+-pip/_vendor/requests/packages/urllib3/util/url.py
+ pip/backwardcompat/__init__.py
+ pip/commands/__init__.py
+ pip/commands/bundle.py
+@@ -217,4 +67,4 @@
+ pip/vcs/bazaar.py
+ pip/vcs/git.py
+ pip/vcs/mercurial.py
+-pip/vcs/subversion.py
+\ No newline at end of file
++pip/vcs/subversion.py
