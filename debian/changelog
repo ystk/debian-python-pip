@@ -1,3 +1,11 @@
+python-pip (1.5.6-5+deb8u2) jessie-security; urgency=high
+
+  * Non-maintainer upload by the ELTS team.
+  * Add patch to not split git references on unicode separators.
+    (LP: #1926957) (Fixes: CVE-2021-3572)
+
+ -- Utkarsh Gupta <utkarsh.gupta@canonical.com>  Thu, 01 Jul 2021 18:17:47 +0530
+
 python-pip (1.5.6-5+deb8u1) jessie-security; urgency=high
 
   * CVE-2019-20916: Prevent a directory traversal attack that was possible when
